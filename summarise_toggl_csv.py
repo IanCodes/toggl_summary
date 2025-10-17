@@ -3,24 +3,36 @@
 # Pandas provides methods for handling CSV files
 import pandas as pd
 
+# Function to convert time into seconds and then reformats as HH:MM:SS
+# MS copilot suggestion
+def format_timedelta_hhhmmss(td: pd.Timedelta) -> str:
+    total_seconds = int(td.total_seconds())
+    sign = "-" if total_seconds < 0 else ""
+    total_seconds = abs(total_seconds)
+    hours, rem = divmod(total_seconds, 3600)
+    minutes, seconds = divmod(rem, 60)
+    return f"{sign}{hours}:{minutes:02d}:{seconds:02d}"
+
+
 # Read a CSV file into a DataFrame
-df = pd.read_csv('TogglTrack_annonymous_test.csv')
+df = pd.read_csv('TogglTrack_anonymous_test.csv')
 
 # Show first few lines of CSV
-print(df.head())
+#print(df.head())
 
 # Show column names
-print(list(df.columns))
+#print(list(df.columns))
 
 # Show tags 
-print(df.Tags)
+#print(df.Tags)
 
 # The Tags column can have multiple entires separated by a comma.  I want to get time information for individual tags.
 # Try exploding tags into their own row
 # HOWEVER, explode only works on lists, so convert the Tags field to a list
 
 # Convert Duration to timedelta
-df['Duration'] = pd.to_timedelta(df['Duration'])
+# missing values given a value of 0 in the correct time format
+df['Duration'] = pd.to_timedelta(df['Duration'], errors="coerce").fillna(pd.Timedelta(0))
 
 # Convert the Tags column from string to list
 # lambda represents an anonymous function
@@ -28,20 +40,25 @@ df['Tags'] = df['Tags'].apply(lambda x: [tag.strip() for tag in str(x).split(','
 
 df_exploded = df.explode('Tags')
 
-print(f"Length of df {len(df)}")
-print(f"Length of df_exploded {len(df_exploded)}")
+#print(f"Length of df {len(df)}")
+#print(f"Length of df_exploded {len(df_exploded)}")
 
 # Look through each line of df_exploded
-# iterows reterns a tuple, so they need unpacking, which can be done using index
-for index, row in df_exploded.iterrows():
-    print(f"Index: {index} Tags: {row['Tags']} Duration: {row['Duration']}")
+# iterows returns a tuple, so they need unpacking, which can be done using index
+#for index, row in df_exploded.iterrows():
+#    print(f"Index: {index} Tags: {row['Tags']} Duration: {row['Duration']}")
 
 # Group by tag and sum durations
-tag_duration_sum = df_exploded.groupby('Tags')['Duration'].sum()
+#df_tag_duration_sum = df_exploded.groupby('Tags')['Duration'].sum()
+df_tag_duration_sum = df_exploded.groupby("Tags", as_index=False)["Duration"].sum()
 
-# Display result
-print(tag_duration_sum)
+# Apply formatter to allow hours > 24
+#df_tag_duration_sum_fmt = df_tag_duration_sum.map(format_timedelta_hhhmmss)
+df_tag_duration_sum["Total_HHH_MM_SS"] = df_tag_duration_sum["Duration"].map(format_timedelta_hhhmmss)
 
+# Display whole data frame
+print(df_tag_duration_sum)
 
-#Need to convert '1 days 05:18:11' to total hours.
-# possibly https://stackoverflow.com/questions/31283001/get-total-number-of-hours-from-a-pandas-timedelta
+# Display selected columns
+print(df_tag_duration_sum[["Tags", "Total_HHH_MM_SS"]].to_string(index=False))
+
