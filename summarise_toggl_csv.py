@@ -63,17 +63,21 @@ df_tag_duration_sum["Total_HHH_MM_SS"] = df_tag_duration_sum["Duration"].map(for
 #print(df_tag_duration_sum[["Tags", "Total_HHH_MM_SS"]].to_string(index=False))
 
 # Display selected tags
-choice = input("Enter a tag (case insensitive), more than one tag via a comma delimited list (e.g. tag1,tag2), or 'All' for all tags: ")
+choice = input("Enter a tag (case insensitive), more than one tag via a comma delimited list (e.g. tag1,tag2), or 'All' for all tags: ").lower()
 print(choice)
 
-if choice == "All":
+if choice == "all":
     print(df_tag_duration_sum[["Tags", "Total_HHH_MM_SS"]].to_string(index=False))
-
+    total_duration = pd.to_timedelta(df_tag_duration_sum["Total_HHH_MM_SS"]).sum()
+    print(f"Total time on all tags: {format_timedelta_hhhmmss(total_duration)}")
 else:
     choice_regex = "|".join(choice.split(","))
 
     # Pattern match for user selection is case-sensitive and ignores errors for missing info.
     print(df_tag_duration_sum[df_tag_duration_sum["Tags"].str.contains(choice_regex, case=False, na=False)][["Tags", "Total_HHH_MM_SS"]].to_string(index=False))    
 
+    # Output total time spent on user selected tags
+    df_tag_duration_sum_choice = df_tag_duration_sum[df_tag_duration_sum["Tags"].str.contains(choice_regex, case=False, na=False)][["Tags", "Total_HHH_MM_SS"]]
 
-
+    choice_duration = pd.to_timedelta(df_tag_duration_sum_choice["Total_HHH_MM_SS"]).sum()
+    print(f"Total time on selected tags: {format_timedelta_hhhmmss(choice_duration)}")
