@@ -17,7 +17,7 @@ def format_timedelta_hhhmmss(td: pd.Timedelta) -> str:
 df = pd.read_csv('TogglTrack_anonymous_test.csv')
 
 # Show first few lines of CSV
-print(df.head())
+#print(df.head())
 
 # Show column names
 #print(list(df.columns))
@@ -63,15 +63,17 @@ df_tag_duration_sum["Total_HHH_MM_SS"] = df_tag_duration_sum["Duration"].map(for
 #print(df_tag_duration_sum[["Tags", "Total_HHH_MM_SS"]].to_string(index=False))
 
 # Display selected tags
-choice = input("Enter tag (case insensitive), or 'All' for all tags: ")
+choice = input("Enter a tag (case insensitive), more than one tag via a comma delimited list (e.g. tag1,tag2), or 'All' for all tags: ")
 print(choice)
 
-if choice == "A":
+if choice == "All":
     print(df_tag_duration_sum[["Tags", "Total_HHH_MM_SS"]].to_string(index=False))
 
 else:
+    choice_regex = "|".join(choice.split(","))
+
     # Pattern match for user selection is case-sensitive and ignores errors for missing info.
-    print(df_tag_duration_sum[df_tag_duration_sum["Tags"].str.contains(choice, case=False, na=False)][["Tags", "Total_HHH_MM_SS"]].to_string(index=False))    
+    print(df_tag_duration_sum[df_tag_duration_sum["Tags"].str.contains(choice_regex, case=False, na=False)][["Tags", "Total_HHH_MM_SS"]].to_string(index=False))    
 
 
 
