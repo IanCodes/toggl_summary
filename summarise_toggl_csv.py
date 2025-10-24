@@ -13,7 +13,6 @@ def format_timedelta_hhhmmss(td: pd.Timedelta) -> str:
     minutes, seconds = divmod(rem, 60)
     return f"{sign}{hours}:{minutes:02d}:{seconds:02d}"
 
-
 # Read a CSV file into a DataFrame
 df = pd.read_csv('TogglTrack_anonymous_test.csv')
 
@@ -40,6 +39,7 @@ df['Tags'] = df['Tags'].apply(lambda x: [tag.strip() for tag in str(x).split(','
 
 df_exploded = df.explode('Tags')
 
+# Testing for effect of explosion
 #print(f"Length of df {len(df)}")
 #print(f"Length of df_exploded {len(df_exploded)}")
 
@@ -57,8 +57,20 @@ df_tag_duration_sum = df_exploded.groupby("Tags", as_index=False)["Duration"].su
 df_tag_duration_sum["Total_HHH_MM_SS"] = df_tag_duration_sum["Duration"].map(format_timedelta_hhhmmss)
 
 # Display whole data frame
-print(df_tag_duration_sum)
+#print(df_tag_duration_sum)
 
 # Display selected columns
-print(df_tag_duration_sum[["Tags", "Total_HHH_MM_SS"]].to_string(index=False))
+#print(df_tag_duration_sum[["Tags", "Total_HHH_MM_SS"]].to_string(index=False))
+
+# Display selected tags
+choice = input("Enter tag, or 'A' for all tags: ")
+print(choice)
+
+if choice == "A":
+    print(df_tag_duration_sum[["Tags", "Total_HHH_MM_SS"]].to_string(index=False))
+
+else:
+    print(df_tag_duration_sum[df_tag_duration_sum["Tags"] == choice][["Tags", "Total_HHH_MM_SS"]].to_string(index=False))    
+
+
 
