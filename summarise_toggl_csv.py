@@ -2,6 +2,19 @@
 
 # Pandas provides methods for handling CSV files
 import pandas as pd
+import argparse
+import sys
+
+# Allow use of command line arguments
+parser = argparse.ArgumentParser()
+parser.add_argument("-i", "--input", help="toggl detailed report in CSV format")
+parser.add_argument("-t", "--tag", help="tag with which to output total time spent")
+args = parser.parse_args()
+
+# If no arguments are provided
+if len(sys.argv) == 1:
+    parser.print_help()
+    sys.exit(1)
 
 # Function to convert time into seconds and then reformats as HH:MM:SS
 # MS copilot suggestion
@@ -14,7 +27,9 @@ def format_timedelta_hhhmmss(td: pd.Timedelta) -> str:
     return f"{sign}{hours}:{minutes:02d}:{seconds:02d}"
 
 # Read a CSV file into a DataFrame
-df = pd.read_csv('TogglTrack_anonymous_test.csv')
+#df = pd.read_csv('TogglTrack_anonymous_test.csv')
+df = pd.read_csv(args.input)
+print(f"Reading toggl report: {args.input}")
 
 # Show first few lines of CSV
 #print(df.head())
@@ -63,9 +78,10 @@ df_tag_duration_sum["Total_HHH_MM_SS"] = df_tag_duration_sum["Duration"].map(for
 #print(df_tag_duration_sum[["Tags", "Total_HHH_MM_SS"]].to_string(index=False))
 
 # Display selected tags
-choice = input("Enter a tag (case insensitive), more than one tag via a comma delimited list (e.g. tag1,tag2), or 'All' for all tags: ").lower()
-print(choice)
+#choice = input("Enter a tag (case insensitive), more than one tag via a comma delimited list (e.g. tag1,tag2), or 'All' for all tags: ").lower()
+#print(choice)
 
+choice = args.tag
 if choice == "all":
     print(df_tag_duration_sum[["Tags", "Total_HHH_MM_SS"]].to_string(index=False))
     total_duration = pd.to_timedelta(df_tag_duration_sum["Total_HHH_MM_SS"]).sum()
